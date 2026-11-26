@@ -17,7 +17,7 @@
 
 <p align="center">
   <a href="https://arxiv.org/abs/2611.34366">Paper</a> &nbsp;·&nbsp;
-  <a href="https://huggingface.co/JJHou1/ConTra">Hugging Face</a> &nbsp;·&nbsp;
+  <a href="https://huggingface.co/collections/JJHou1/contra-context-that-travels-6b0803475f61d1ce6059e938">Hugging Face</a> &nbsp;·&nbsp;
   <a href="#method">Method</a> &nbsp;·&nbsp;
   <a href="#realcontextbench">RealContextBench</a> &nbsp;·&nbsp;
   <a href="#results">Results</a>
