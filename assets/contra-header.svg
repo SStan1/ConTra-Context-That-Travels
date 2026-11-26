@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">ConTra — Context That Travels</title>
+  <desc id="desc">The same context prefix accompanies its passage from generation through retrieval and reranking along a continuous route.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#141933"/><stop offset="1" stop-color="#242e58"/></linearGradient>
+    <linearGradient id="route" x2="1"><stop stop-color="#7f8fff" stop-opacity=".3"/><stop offset=".35" stop-color="#aeb8ff"/><stop offset="1" stop-color="#aeb8ff"/></linearGradient>
+  </defs>
+  <rect width="1200" height="420" rx="24" fill="url(#bg)"/>
+  <circle cx="960" cy="206" r="195" fill="#8c9aff" fill-opacity=".025"/>
+  <circle cx="960" cy="206" r="147" fill="none" stroke="#a1adff" stroke-opacity=".065"/>
+  <circle cx="960" cy="206" r="110" fill="none" stroke="#a1adff" stroke-opacity=".055"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="54" y="52" width="5" height="20" rx="2" fill="#a5afff"/>
+    <text x="73" y="67" fill="#c1c9e7" font-size="13" letter-spacing="2">MULTI-STAGE CONTEXTUAL RETRIEVAL</text>
+    <text x="50" y="173" fill="#fff" font-size="94" font-weight="700" letter-spacing="-4">Con<tspan fill="#b3bcff">Tra</tspan></text>
+    <text x="55" y="224" fill="#edf0ff" font-size="30">Context That Travels</text>
+    <text x="56" y="268" fill="#b7c1e3" font-size="17">From source to search, context stays with the chunk.</text>
+    <g font-size="13" text-anchor="middle" fill="#e1e6fc">
+      <rect x="56" y="313" width="64" height="27" rx="13.5" fill="#35426e"/><text x="88" y="332">0.8B</text>
+      <rect x="130" y="313" width="58" height="27" rx="13.5" fill="#35426e"/><text x="159" y="332">2B</text>
+      <rect x="198" y="313" width="58" height="27" rx="13.5" fill="#35426e"/><text x="227" y="332">4B</text>
+    </g>
+    <text x="608" y="67" fill="#bac6ed" font-size="12" letter-spacing="2">ONE PREFIX. THE WHOLE JOURNEY.</text>
+    <path d="M556 265H634Q660 265 660 239V218Q660 192 686 192H794Q820 192 820 218V239Q820 265 846 265H954Q980 265 980 239V218Q980 192 1006 192H1137" fill="none" stroke="#9eaaff" stroke-opacity=".07" stroke-width="18"/>
+    <path d="M556 265H634Q660 265 660 239V218Q660 192 686 192H794Q820 192 820 218V239Q820 265 846 265H954Q980 265 980 239V218Q980 192 1006 192H1137" fill="none" stroke="url(#route)" stroke-width="2.5"/>
+    <path d="M720 186L728 192L720 198M884 259L892 265L884 271M1128 186L1137 192L1128 198" fill="none" stroke="#ccd3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="567" cy="265" r="4" fill="#a5afff"/>
+    <g transform="translate(586 118)">
+      <rect x="0" y="0" width="134" height="115" rx="10" fill="#f0f3ff"/>
+      <path d="M0 10Q0 0 10 0H124Q134 0 134 10V36H0Z" fill="#c2c9ff"/>
+      <text x="13" y="24" fill="#291f6b" font-size="13" font-weight="700">Context prefix</text>
+      <text x="13" y="62" fill="#425075" font-size="12">Original chunk</text>
+      <path d="M14 77H119M14 90H119M14 103H91" stroke="#bdc7e4" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(788 151)">
+      <rect x="0" y="0" width="134" height="115" rx="10" fill="#f0f3ff"/>
+      <path d="M0 10Q0 0 10 0H124Q134 0 134 10V36H0Z" fill="#c2c9ff"/>
+      <text x="13" y="24" fill="#291f6b" font-size="13" font-weight="700">Context prefix</text>
+      <text x="13" y="62" fill="#425075" font-size="12">Original chunk</text>
+      <path d="M14 77H119M14 90H119M14 103H91" stroke="#bdc7e4" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(990 118)">
+      <rect x="0" y="0" width="134" height="115" rx="10" fill="#f0f3ff"/>
+      <path d="M0 10Q0 0 10 0H124Q134 0 134 10V36H0Z" fill="#c2c9ff"/>
+      <text x="13" y="24" fill="#291f6b" font-size="13" font-weight="700">Context prefix</text>
+      <text x="13" y="62" fill="#425075" font-size="12">Original chunk</text>
+      <path d="M14 77H119M14 90H119M14 103H91" stroke="#bdc7e4" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g font-size="14" text-anchor="middle" fill="#e0e7ff">
+      <circle cx="653" cy="306" r="4" fill="#c2c9ff"/><text x="653" y="334">Write</text>
+      <circle cx="855" cy="306" r="4" fill="#c2c9ff"/><text x="855" y="334">Retrieve</text>
+      <circle cx="1057" cy="306" r="4" fill="#c2c9ff"/><text x="1057" y="334">Rerank</text>
+    </g>
+    <text x="855" y="377" text-anchor="middle" fill="#afbcdf" font-size="13">Same prefix · Same chunk · Across stages</text>
+  </g>
+</svg>

@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ConTra carries readable context through retrieval and reranking. Method, RealContextBench, and paper results.">
+  <title>ConTra: A Training Framework for Effective Contextual Retrieval via Prefix Generation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f8fafd;
+      --surface: #fff;
+      --ink: #151b30;
+      --muted: #4a5670;
+      --accent: #4c38c1;
+      --accent-hover: #3c28a7;
+      --accent-soft: #ebe8ff;
+      --rule: #dce2ee;
+      --surface-subtle: #f0f3fb;
+      --gutter: clamp(16px, 4vw, 48px);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-padding-top: 85px; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.65 "Segoe UI", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    button { font: inherit; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    img { display: block; max-width: 100%; height: auto; }
+    .wrap { max-width: 1232px; margin-inline: auto; padding-inline: var(--gutter); }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--surface);
+      border-bottom: 1px solid var(--rule);
+    }
+    .topbar-inner {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .brand {
+      font-size: 23px;
+      font-weight: 750;
+      letter-spacing: -1px;
+      text-decoration: none;
+    }
+    .brand span { color: var(--accent); }
+    .nav { display: flex; align-items: center; gap: clamp(12px, 3vw, 34px); }
+    .nav a {
+      padding-block: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+    }
+    .nav a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 5px; }
+    .hero { padding-top: clamp(30px, 4vw, 50px); }
+    .hero-copy { margin: 0 auto clamp(24px, 3vw, 34px); text-align: center; }
+    .paper-title { margin: 0; font-weight: 400; }
+    .title-main {
+      display: block;
+      font-size: clamp(3.5rem, 7.4vw, 5.45rem);
+      font-weight: 760;
+      line-height: 1.02;
+      letter-spacing: -.075em;
+      text-wrap: balance;
+    }
+    .title-sub {
+      display: block;
+      max-width: 46ch;
+      margin: .75rem auto 0;
+      color: var(--muted);
+      font-size: clamp(1.08rem, 2.1vw, 1.45rem);
+      font-weight: 550;
+      line-height: 1.34;
+      text-wrap: balance;
+    }
+    .byline {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px 12px;
+      margin-top: 17px;
+      font-size: 13px;
+    }
+    .authors { font-weight: 700; }
+    .affiliation { color: var(--muted); }
+    .resource-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .resource-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 43px;
+      padding: 8px 16px;
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .resource-link span { color: var(--accent); }
+    .resource-link:hover { background: var(--accent-soft); border-color: #afa4eb; }
+    .resource-link-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .resource-link-primary span { color: inherit; }
+    .resource-link-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .hero-art { width: 100%; border-radius: 17px; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      background: var(--surface);
+      margin-top: clamp(20px, 3vw, 32px);
+    }
+    .stat { padding: clamp(14px, 2.4vw, 22px) clamp(8px, 2.9vw, 30px); }
+    .stat + .stat { border-left: 1px solid var(--rule); }
+    .stat strong {
+      display: block;
+      color: var(--accent);
+      font-size: clamp(1.75rem, 4.5vw, 3.4rem);
+      font-weight: 710;
+      line-height: 1.05;
+      letter-spacing: -.06em;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    .stat-label { display: block; margin-top: 8px; font-size: 14px; font-weight: 700; }
+    .stat small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .section { margin-top: clamp(40px, 6.1vw, 74px); }
+    .section + .section { padding-top: clamp(30px, 5vw, 54px); border-top: 1px solid var(--rule); }
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr);
+      align-items: baseline;
+      gap: 18px 42px;
+      margin-bottom: 24px;
+    }
+    h2 {
+      font-size: clamp(1.6rem, 3.4vw, 2.7rem);
+      font-weight: 720;
+      line-height: 1.12;
+      letter-spacing: -.045em;
+      margin: 0;
+    }
+    .intro { margin: 0; color: var(--muted); font-size: 15px; }
+    .intro strong { color: var(--ink); }
+    .figure {
+      margin: 0;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 13px;
+      overflow: hidden;
+    }
+    .figure-button { display: block; width: 100%; padding: clamp(8px, 2vw, 22px); border: 0; background: var(--surface); }
+    .figure-button:focus-visible { outline-offset: -3px; }
+    .figure-button img { width: 100%; }
+    .figure-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 5px 20px;
+      padding: 11px clamp(11px, 2vw, 22px);
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .zoom-hint { color: var(--accent); font-weight: 650; }
+    .table-shell {
+      border: 1px solid var(--rule);
+      border-radius: 11px;
+      background: var(--surface);
+      overflow-x: auto;
+    }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; text-align: left; }
+    th, td { padding: 11px 17px; border-bottom: 1px solid var(--rule); }
+    thead th { background: var(--surface-subtle); color: var(--muted); font-size: 12px; font-weight: 700; }
+    tbody th[scope="row"] { font-weight: 500; }
+    tbody tr:last-child > * { border-bottom: 0; }
+    tbody tr:hover > * { background: var(--surface-subtle); }
+    .number { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .data-table { min-width: 505px; }
+    .table-note { color: var(--muted); margin: 10px 0 0; font-size: 12px; }
+    .conditions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2.3fr);
+      gap: 16px 30px;
+      margin-top: 22px;
+      padding: 19px 21px;
+      background: var(--surface-subtle);
+      border-radius: 9px;
+    }
+    .conditions h3 { font-size: 15px; margin: 0 0 4px; }
+    .conditions p { color: var(--muted); font-size: 13px; margin: 0; }
+    .condition-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 15px;
+      margin: 0;
+    }
+    .condition-list div { border-left: 1px solid #cbd2e8; padding-left: 12px; }
+    .condition-list dt { color: var(--accent); font-size: 13px; font-weight: 700; }
+    .condition-list dd { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .family > * { border-top: 2px solid var(--rule); }
+    .ours > * { background: #f4f2ff; }
+    .ours th[scope="row"] { font-weight: 720; }
+    .best > *, .best:hover > * { background: var(--accent-soft); }
+    .best th[scope="row"] { box-shadow: inset 3px 0 0 var(--accent); }
+    .best .number { color: var(--accent); font-weight: 750; }
+    .footer {
+      border-top: 1px solid var(--rule);
+      margin-top: clamp(40px, 6vw, 70px);
+      padding: 18px 0 26px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 6px 20px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    dialog {
+      width: min(1600px, calc(100vw - 28px));
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 12px 18px 18px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+    dialog::backdrop { background: #11162dd9; }
+    .dialog-controls { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+    .dialog-close {
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 4px 12px;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 13px;
+    }
+    .figure-scroll { overflow: auto; }
+    .figure-scroll img { width: 100%; min-width: 820px; max-width: none; }
+    @media (max-width: 720px) {
+      .topbar-inner { min-height: 54px; }
+      .nav a { font-size: 12px; }
+      .hero-art { border-radius: 8px; }
+      .resource-link { padding-inline: 12px; font-size: 13px; }
+      .stat-label { overflow-wrap: anywhere; font-size: 11px; }
+      .stat small { font-size: 10px; }
+      .section-head, .conditions { grid-template-columns: 1fr; gap: 11px; }
+      .section-head { margin-bottom: 17px; }
+      .intro { font-size: 14px; }
+      table { font-size: 12px; line-height: 1.35; }
+      th, td { padding: 9px 8px; }
+      thead th { font-size: 11px; }
+      #results-table thead th { white-space: normal; }
+      .conditions { padding: 14px; }
+      .condition-list { gap: 7px; }
+      .condition-list div { padding-left: 7px; }
+      .condition-list dd { line-height: 1.35; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top" aria-label="ConTra home">Con<span>Tra</span></a>
+      <nav class="nav" aria-label="Page navigation">
+        <a href="#method">Method</a>
+        <a href="#benchmark">Benchmark</a>
+        <a href="#results">Results</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap" id="top">
+    <div class="hero">
+      <div class="hero-copy">
+        <h1 class="paper-title">
+          <span class="title-main">ConTra<span class="sr-only">:</span></span>
+          <span class="title-sub">A Training Framework for Effective Contextual Retrieval via Prefix Generation</span>
+        </h1>
+        <div class="byline">
+          <span class="authors">Jiajun Hou · Jingbang Chen</span>
+          <span class="affiliation">CUHK-Shenzhen · SLAI</span>
+        </div>
+        <nav class="resource-links" aria-label="Project resources">
+          <a class="resource-link resource-link-primary" href="https://arxiv.org/abs/2611.34366">Paper <span aria-hidden="true">↗</span></a>
+          <a class="resource-link" href="https://github.com/SStan1/ConTra">Code <span aria-hidden="true">↗</span></a>
+          <a class="resource-link" href="https://huggingface.co/JJHou1/ConTra">Hugging Face <span aria-hidden="true">↗</span></a>
+        </nav>
+      </div>
+      <img class="hero-art" src="assets/contra-header.svg" width="1200" height="420"
+           alt="The same context prefix travels with a chunk through writing, retrieval, and reranking.">
+      <div class="stats" aria-label="Selected ConTra-2B paper results">
+        <div class="stat">
+          <strong>85.25</strong><span class="stat-label">ConTEB</span>
+          <small>ConTra-2B · reranked nDCG@10 × 100</small>
+        </div>
+        <div class="stat">
+          <strong>66.92</strong><span class="stat-label">RealContextBench</span>
+          <small>ConTra-2B · reranked nDCG@10 × 100</small>
+        </div>
+        <div class="stat">
+          <strong>7.74×</strong><span class="stat-label">Faster indexing</span>
+          <small>ConTra-2B vs. prompted 9B · short documents · H100 80GB</small>
+        </div>
+      </div>
+    </div>
+
+    <section class="section" id="method" aria-labelledby="method-heading">
+      <div class="section-head">
+        <h2 id="method-heading">Method</h2>
+        <p class="intro">ConTra uses <strong>reinforcement learning (RL)</strong> to train Qwen3.5 models to write compact, source-supported context prefixes. At indexing time, the model reads the target chunk and its surroundings. Its prefix travels with the chunk through embedding retrieval and reranking, and is reused across queries.</p>
+      </div>
+      <figure class="figure">
+        <button class="figure-button" id="open-figure" type="button" aria-label="Enlarge the paper overview figure">
+          <img src="assets/contra-pipeline.svg" width="1280" height="354"
+               alt="Paper Figure 1 compares context prefixes used in retrieval and reranking with late chunking, which gives the reranker the original chunk.">
+        </button>
+        <figcaption class="figure-footer">
+          <span>Figure 1 from the paper</span><span class="zoom-hint" aria-hidden="true">Enlarge figure ↗</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="section" id="benchmark" aria-labelledby="benchmark-heading">
+      <div class="section-head">
+        <h2 id="benchmark-heading">RealContextBench</h2>
+        <p class="intro">Five application collections naturally mix self-contained and context-dependent passages. Each collection has a shared retrieval corpus with targets mapped from human-annotated answers or evidence.</p>
+      </div>
+      <div class="table-shell" tabindex="0" role="region" aria-label="Dataset sizes">
+        <table class="data-table"><caption class="sr-only">Sizes of RealContextBench application collections</caption>
+        <thead>
+          <tr><th scope="col">Collection</th><th scope="col">Domain</th><th scope="col" class="number">Queries</th><th scope="col" class="number">Docs</th><th scope="col" class="number">Chunks</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Natural Questions</th><td>Web search</td><td class="number">5,499</td><td class="number">5,181</td><td class="number">99,096</td></tr>
+          <tr><th scope="row">TechQA</th><td>Technical support</td><td class="number">149</td><td class="number">139</td><td class="number">1,036</td></tr>
+          <tr><th scope="row">FairytaleQA</th><td>Story comprehension</td><td class="number">1,007</td><td class="number">23</td><td class="number">342</td></tr>
+          <tr><th scope="row">QMSum</th><td>Meetings</td><td class="number">244</td><td class="number">35</td><td class="number">2,140</td></tr>
+          <tr><th scope="row">FinanceBench</th><td>Financial analysis</td><td class="number">146</td><td class="number">84</td><td class="number">45,049</td></tr>
+        </tbody>
+        </table>
+      </div>
+      <div class="conditions">
+        <div>
+          <h3>NanoBEIR context conditions</h3>
+          <p>Across 13 tasks, queries, targets, and relevance annotations stay fixed.</p>
+        </div>
+        <dl class="condition-list">
+          <div><dt>Original</dt><dd>Target chunk alone</dd></div>
+          <div><dt>Random</dt><dd>Four randomly sampled passages</dd></div>
+          <div><dt>Topical</dt><dd>Four generated passages on the topic, about unrelated subjects or events</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="section" id="results" aria-labelledby="results-heading">
+      <div class="section-head">
+        <h2 id="results-heading">Retrieval results</h2>
+        <p class="intro">Macro-averaged nDCG@10 after top-15 reranking with Qwen3-Reranker-4B.</p>
+      </div>
+      <div class="table-shell" tabindex="0" role="region" aria-label="Retrieval results">
+        <table id="results-table"><caption class="sr-only">Macro-averaged results after reranking</caption>
+        <thead>
+          <tr><th scope="col">Method</th><th scope="col" class="number">ConTEB</th><th scope="col" class="number">RealContextBench</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Qwen3-Embedding-4B · original text</th><td class="number">0.6483</td><td class="number">0.6373</td></tr>
+          <tr><th scope="row">InSeNT</th><td class="number">0.6381</td><td class="number">0.5291</td></tr>
+          <tr><th scope="row">PPLX-context-0.6B</th><td class="number">0.7110</td><td class="number">0.6083</td></tr>
+          <tr><th scope="row">PPLX-context-4B</th><td class="number">0.7310</td><td class="number">0.6542</td></tr>
+          <tr><th scope="row">Voyage-context-3</th><td class="number">0.7292</td><td class="number">0.6636</td></tr>
+          <tr><th scope="row">Voyage-context-4</th><td class="number">0.7300</td><td class="number">0.6608</td></tr>
+          <tr class="family"><th scope="row">Qwen3.5-0.8B</th><td class="number">0.6531</td><td class="number">0.6384</td></tr>
+          <tr><th scope="row">Qwen3.5-2B</th><td class="number">0.7585</td><td class="number">0.6456</td></tr>
+          <tr><th scope="row">Qwen3.5-4B</th><td class="number">0.8110</td><td class="number">0.6553</td></tr>
+          <tr><th scope="row">Qwen3.5-9B</th><td class="number">0.8279</td><td class="number">0.6632</td></tr>
+          <tr class="ours family"><th scope="row">ConTra-0.8B</th><td class="number">0.7346</td><td class="number">0.6471</td></tr>
+          <tr class="ours best"><th scope="row">ConTra-2B</th><td class="number">0.8525</td><td class="number">0.6692</td></tr>
+          <tr class="ours"><th scope="row">ConTra-4B</th><td class="number">0.8465</td><td class="number">0.6669</td></tr>
+        </tbody>
+        </table>
+      </div>
+      <p class="table-note">ConTEB averages eight tasks. RealContextBench averages five application collections and three NanoBEIR conditions. Contextual encoders supply original chunks to the reranker. Prefix-based pipelines supply the prefix and original chunk.</p>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <div class="footer"><span>ConTra · Context That Travels</span><span>Jiajun Hou &amp; Jingbang Chen</span></div>
+  </footer>
+  <dialog id="figure-dialog" aria-label="Paper overview figure">
+    <form class="dialog-controls" method="dialog"><button class="dialog-close" type="submit">Close ×</button></form>
+    <div class="figure-scroll" tabindex="0" role="region" aria-label="Full size paper figure">
+      <img src="assets/contra-pipeline.svg" alt="Enlarged comparison of prefix-based and contextual-encoder retrieval pipelines.">
+    </div>
+  </dialog>
+  <script>
+    const figureDialog = document.getElementById('figure-dialog');
+    document.getElementById('open-figure').addEventListener('click', () => figureDialog.showModal());
+    figureDialog.addEventListener('click', event => {
+      if (event.target !== figureDialog) return;
+      const { left, right, top, bottom } = figureDialog.getBoundingClientRect();
+      if (event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom) {
+        figureDialog.close();
+      }
+    });
+  </script>
+</body>
+</html>
